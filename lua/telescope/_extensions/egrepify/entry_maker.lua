@@ -130,10 +130,14 @@ end
 local cache = {}
 local function line_display(entry, data, opts, ts_highlights)
   entry = entry or {}
-  local file_devicon, devicon_hl
-  if opts.title == false then
-    file_devicon, devicon_hl = ts_utils.transform_devicons(entry.filename, entry.filename, false)
+  if not cache[entry.filename] then
+    local file_devicon, devicon_hl = ts_utils.transform_devicons(entry.filename, entry.filename, false)
+    cache[entry.filename] = { file_devicon, devicon_hl }
   end
+  local file_devicon, devicon_hl = cache[entry.filename][1], cache[entry.filename][2]
+  -- if opts.title == false then
+  --   file_devicon, devicon_hl = ts_utils.transform_devicons(entry.filename, entry.filename, false)
+  -- end
   local lnum
   local lnum_width = opts.lnum and (opts.lnum_width or num_width(entry.lnum)) or 0
   local col_width = opts.col and (opts.col_width or num_width(entry.col)) or 0

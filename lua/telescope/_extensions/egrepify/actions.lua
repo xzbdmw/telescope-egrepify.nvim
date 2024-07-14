@@ -50,8 +50,9 @@ function egrep_actions.toggle_permutations(prompt_bufnr)
   local current_picker = action_state.get_current_picker(prompt_bufnr)
   current_picker.permutations = not current_picker.permutations
   local msg = current_picker.permutations and "Permutations enabled" or "Permutations disabled"
+  print(msg)
   dismiss_notifications()
-  egrep_utils.notify("picker", { msg = msg, level = "INFO" })
+  -- egrep_utils.notify("picker", { msg = msg, level = "INFO" })
   current_picker:refresh()
 end
 

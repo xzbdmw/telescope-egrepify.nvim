@@ -58,6 +58,7 @@ end
 
 ---@class PickerConfig
 ---@field cwd string directory to run `rg` input
+---@field literal string -F
 ---@field grep_open_files boolean search only open files (default: false)
 ---@field search_dirs string[] directory/directories/files to search, mutually excl. with `grep_open_files`(default: false)
 ---@field vimgrep_arguments table args for `rg`, see |telescope.defaults.vimgrep_arguments|
@@ -114,8 +115,22 @@ function Picker.picker(opts)
     ---@diagnostic disable-next-line: undefined-field
     opts.filename_hl = opts.title_hl
   end
-
-  local vimgrep_arguments = opts.vimgrep_arguments or conf.vimgrep_arguments
+  local vimgrep_arguments = {
+    "rg",
+    "--color=never",
+    "--no-heading",
+    "--with-filename",
+    "--line-number",
+    "--column",
+    "--smart-case",
+    "--glob",
+    "!.git",
+    "--max-count",
+    "20",
+  }
+  if opts.literal then
+    table.insert(vimgrep_arguments, "-F")
+  end
   opts.cwd = opts.cwd and vim.fn.expand(opts.cwd) or vim.loop.cwd()
   local open_files = vim.F.if_nil(opts.grep_open_files, egrep_conf.grep_open_files)
       and egrep_utils._get_open_files(opts.cwd)
@@ -162,6 +177,9 @@ function Picker.picker(opts)
         prompt_args[#prompt_args + 1] = prefix_args
       end
     end
+
+    -- prompt_args[#prompt_args + 1] = "--glob=*{lua/plugins/cmp.lua}"
+    -- prompt_args[#prompt_args + 1] = "/Users/xzb/.config/nvim/lua/config/keymaps.lua"
     if not current_picker.permutations then
       prompt = table.concat(tokens, " ")
       -- matches everything in between sub-tokens of prompt
@@ -172,7 +190,8 @@ function Picker.picker(opts)
       prompt = egrep_utils.permutations(tokens)
     end
 
-    return flatten { args, prompt_args, "--", prompt, search_list }
+    local res = flatten { args, prompt_args, "--", prompt, search_list }
+    return res
   end, egrep_entry_maker(opts), opts.max_results, opts.cwd)
 
   local sorting_strategy = vim.F.if_nil(opts.sorting_strategy, require("telescope.config").values.sorting_strategy)
@@ -185,7 +204,6 @@ function Picker.picker(opts)
     finder = live_grepper,
     -- slight hack that should be simple and work well in practice
     -- descending puts title "after" matches, while ascending has title "before" matches
-    default_selection_index = is_descending and 1 or 2,
     previewer = conf.grep_previewer(opts),
     sorter = sorter,
     tiebreak = tiebreak,
