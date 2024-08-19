@@ -125,8 +125,8 @@ function Picker.picker(opts)
     "--smart-case",
     "--glob",
     "!.git",
-    "--max-count",
-    "20",
+    -- "--max-count",
+    -- "20",
   }
   if opts.literal then
     table.insert(vimgrep_arguments, "-F")

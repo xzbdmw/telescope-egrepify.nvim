@@ -131,7 +131,8 @@ local cache = {}
 local function line_display(entry, data, opts, ts_highlights)
   entry = entry or {}
   if not cache[entry.filename] then
-    local file_devicon, devicon_hl = ts_utils.transform_devicons(entry.filename, entry.filename, false)
+    local tail = vim.fs.basename(entry.filename)
+    local file_devicon, devicon_hl = ts_utils.transform_devicons(tail, tail, false)
     cache[entry.filename] = { file_devicon, devicon_hl }
   end
   local file_devicon, devicon_hl = cache[entry.filename][1], cache[entry.filename][2]
@@ -170,7 +171,7 @@ local function line_display(entry, data, opts, ts_highlights)
   if opts.title == false then
     begin = find_whitespace(file_devicon)
     highlights[#highlights + 1] = { { 0, begin }, devicon_hl }
-    end_ = #entry.filename + begin
+    end_ = #vim.fs.basename(entry.filename) + begin
     highlights[#highlights + 1] = { { begin, end_ }, opts.filename_hl }
     begin = end_ + 1
   end
