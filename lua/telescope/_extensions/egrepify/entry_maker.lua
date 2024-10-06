@@ -197,20 +197,54 @@ local function line_display(entry, data, opts, ts_highlights)
       end
     end
   end
-  if opts.results_ts_hl then
-    if ts_highlights[entry.path] == nil then
-      ts_highlights[entry.path] = get_ts_highlights(entry.path)
-    end
-    if ts_highlights[entry.path] and ts_highlights[entry.path][entry.lnum] then
-      for ts_col, hl in pairs(ts_highlights[entry.path][entry.lnum]) do
-        if not covered_ids[ts_col] then
-          highlights[#highlights + 1] = { { begin + ts_col, begin + ts_col + 1 }, hl }
-        end
-      end
-    end
-  end
   return display, highlights
 end
+
+vim.api.nvim_create_autocmd({ "User" }, {
+  pattern = "TelescopePreviewerLoaded",
+  callback = function(data)
+    local action_state = require "telescope.actions.state"
+    local prompt_bufnr = require("telescope.state").get_existing_prompt_bufnrs()[1]
+
+    local picker = action_state.get_current_picker(prompt_bufnr)
+    local title = picker.layout.picker.prompt_title
+    if title ~= "Live Grep" then
+      return
+    end
+    local results = picker.layout.results
+    local bufnr = results.bufnr
+    local winid = results.winid
+    local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+    local regions = {}
+    local bottom_line = vim.api.nvim_win_call(winid, function()
+      return vim.fn.line "w$"
+    end)
+    local first_line = vim.api.nvim_win_call(winid, function()
+      return vim.fn.winsaveview().topline
+    end)
+    for i = first_line, bottom_line do
+      local line = lines[i]
+      -- Find the first occurrence of ':'
+      local first_pos = string.find(line, ":", 1, true)
+      local entry = picker.manager:get_entry(i)
+      if entry == nil then
+        goto continue
+      end
+      local ft = vim.filetype.match { filename = entry.filename }
+      if ft == nil then
+        goto continue
+      end
+      if regions[ft] == nil then
+        regions[ft] = {}
+      end
+      -- Find the second occurrence of ':' starting after the first occurrence
+      local second_pos = string.find(line, ":", first_pos + 1, true)
+      table.insert(regions[ft], { { i - 1, second_pos, i - 1, line:len() } })
+      ::continue::
+    end
+    require("telescope._extensions.egrepify.treesitter").attach(bufnr, regions)
+  end,
+})
 
 local function title_display(filename, _, opts)
   local display_filename = ts_utils.transform_path({ cwd = opts.cwd }, filename)
