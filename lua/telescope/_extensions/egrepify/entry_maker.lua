@@ -127,7 +127,7 @@ local get_ts_highlights = function(path)
   vim.go.eventignore = ei
   return highlights
 end
-
+local cache = {}
 local function line_display(entry, data, opts, ts_highlights)
   entry = entry or {}
   local file_devicon, devicon_hl
