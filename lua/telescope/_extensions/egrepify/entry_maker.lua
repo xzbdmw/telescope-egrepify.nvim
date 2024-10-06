@@ -27,11 +27,7 @@ local function collect(tbl)
 end
 
 local function has_ts_parser(lang)
-  if vim.fn.has "nvim-0.11" == 1 then
-    return vim.treesitter.language.add(lang)
-  else
-    return pcall(vim.treesitter.language.add, lang)
-  end
+  return pcall(vim.treesitter.language.add, lang)
 end
 
 -- get the string width of a number without converting to string
