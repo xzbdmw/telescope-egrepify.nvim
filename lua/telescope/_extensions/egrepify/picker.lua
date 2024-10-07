@@ -185,7 +185,7 @@ function Picker.picker(opts)
       prompt = table.concat(tokens, " ")
       -- matches everything in between sub-tokens of prompt
       if current_picker.AND then
-        prompt = prompt:gsub("%s", ".*")
+        prompt = prompt:gsub("%s", ".*?")
       end
     else -- matches everything in between sub-tokens and permutations
       prompt = egrep_utils.permutations(tokens)
