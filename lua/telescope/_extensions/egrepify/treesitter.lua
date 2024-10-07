@@ -68,8 +68,6 @@ function M._attach_lang(buf, lang, regions)
     local time = vim.uv.hrtime()
     local ok, parser = pcall(vim.treesitter.languagetree.new, buf, lang)
     if not ok then
-      local msg = "nvim-treesitter parser missing `" .. lang .. "`"
-      vim.notify_once(msg, vim.log.levels.WARN, { title = "trouble.nvim" })
       return
     end
     parser:set_included_regions(regions)

@@ -7,6 +7,7 @@ local sorters = require "telescope.sorters"
 local conf = require("telescope.config").values
 local egrep_conf = require("telescope._extensions.egrepify.config").values
 local actions = require "telescope.actions"
+local TSInjector = require "telescope._extensions.egrepify.treesitter"
 
 local flatten = vim.tbl_flatten
 
@@ -222,6 +223,68 @@ function Picker.picker(opts)
     end,
   })
   local preview_fn = picker.previewer.preview
+
+  local entry_adder = picker.entry_adder
+  local regions = {}
+  local valid_lines = {}
+  picker.entry_adder = function(picker_, index, entry, _, insert)
+    entry_adder(picker_, index, entry, _, insert)
+    if not entry.kind == "match" then
+      return
+    end
+
+    local row = picker_:get_row(index)
+    local line_count = vim.api.nvim_buf_line_count(picker_.results_bufnr)
+    local lines = vim.api.nvim_buf_get_lines(picker_.results_bufnr, 0, -1, false)
+    local last_line = -1
+    for i, line in ipairs(lines) do
+      if line == "" then
+        last_line = i
+        break
+      end
+    end
+    if row > line_count then
+      return
+    end
+    if line_count > 20 then
+      if index > 10 and index < line_count - 10 then
+        return
+      end
+    end
+    local line = vim.api.nvim_buf_get_lines(picker_.results_bufnr, row, row + 1, false)[1]
+    local ft = vim.filetype.match { filename = entry.filename }
+    if ft == nil then
+      return
+    end
+    if regions[ft] == nil then
+      regions[ft] = {}
+    end
+
+    if entry.text then
+      local first_pos = string.find(line, entry.text, 1, true)
+      if first_pos == nil then
+        return
+      end
+      first_pos = first_pos - 1
+      -- clear row for FT that used to be in that row
+      if valid_lines[row] and regions[valid_lines[row][1]] then
+        table.remove(regions[valid_lines[row][1]], valid_lines[row][2])
+      end
+      table.insert(regions[ft], { { row, first_pos, row, line:len() } })
+      local offset = #regions[ft]
+      -- store filetype and table offset for line that may have to be invalidated
+      valid_lines[row] = { ft, offset }
+      TSInjector.attach(picker_.results_bufnr, regions)
+    end
+  end
+
+  -- invalidate regions after every keystroke
+  local on_input_filter_cb = picker._on_input_filter_cb
+  picker._on_input_filter_cb = function(prompt)
+    regions = {}
+    return on_input_filter_cb(prompt)
+  end
+
   picker.previewer.preview = function(previewer, entry, status)
     if entry then
       if entry.kind ~= "begin" then
