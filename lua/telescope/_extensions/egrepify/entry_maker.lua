@@ -156,7 +156,7 @@ local function line_display(entry, data, opts, ts_highlights)
       [1] = file_devicon,
       [2] = opts.title == false and ":" or nil,
       [3] = lnum,
-      [4] = lnum and ":" or nil,
+      [4] = lnum and " " or nil,
       [5] = col,
       [6] = col and ":" or nil,
       [7] = (lnum or col) and " " or nil,
@@ -178,6 +178,8 @@ local function line_display(entry, data, opts, ts_highlights)
   if lnum then
     end_ = begin + lnum_width
     highlights[#highlights + 1] = { { begin, end_ }, opts.lnum_hl }
+    highlights[#highlights + 1] = { { begin - 1, begin }, opts.lnum_hl }
+    highlights[#highlights + 1] = { { end_, end_ + 1 }, opts.lnum_hl }
     begin = end_ + 1
   end
   if col then
@@ -206,7 +208,7 @@ local function line_display(entry, data, opts, ts_highlights)
 end
 
 vim.api.nvim_create_autocmd({ "User" }, {
-  pattern = "TelescopePreviewerLoaded",
+  pattern = "TelescopeSetSelection",
   callback = function(data)
     local action_state = require "telescope.actions.state"
     local prompt_bufnr = require("telescope.state").get_existing_prompt_bufnrs()[1]
@@ -231,6 +233,9 @@ vim.api.nvim_create_autocmd({ "User" }, {
       local line = lines[i]
       -- Find the first occurrence of ':'
       local first_pos = string.find(line, ":", 1, true)
+      if first_pos == nil then
+        goto continue
+      end
       local entry = picker.manager:get_entry(i)
       if entry == nil then
         goto continue
@@ -243,7 +248,7 @@ vim.api.nvim_create_autocmd({ "User" }, {
         regions[ft] = {}
       end
       -- Find the second occurrence of ':' starting after the first occurrence
-      local second_pos = string.find(line, ":", first_pos + 1, true)
+      local second_pos = string.find(line, " ", first_pos + 1, true)
       table.insert(regions[ft], { { i - 1, second_pos, i - 1, line:len() } })
       ::continue::
     end

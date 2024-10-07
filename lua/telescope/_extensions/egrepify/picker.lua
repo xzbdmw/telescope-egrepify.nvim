@@ -261,19 +261,15 @@ function Picker.picker(opts)
     end
 
     if entry.text then
-      local first_pos = string.find(line, entry.text, 1, true)
+      local first_pos = string.find(line, ":", 1, true)
       if first_pos == nil then
         return
       end
-      first_pos = first_pos - 1
-      -- clear row for FT that used to be in that row
-      if valid_lines[row] and regions[valid_lines[row][1]] then
-        table.remove(regions[valid_lines[row][1]], valid_lines[row][2])
+      local second_pos = string.find(line, " ", first_pos + 1, true)
+      if second_pos == nil then
+        return
       end
-      table.insert(regions[ft], { { row, first_pos, row, line:len() } })
-      local offset = #regions[ft]
-      -- store filetype and table offset for line that may have to be invalidated
-      valid_lines[row] = { ft, offset }
+      table.insert(regions[ft], { { index - 1, second_pos, index - 1, line:len() } })
       TSInjector.attach(picker_.results_bufnr, regions)
     end
   end
@@ -295,6 +291,11 @@ function Picker.picker(opts)
       preview_fn(previewer, entry, status)
     end
   end
+  -- "refreshes" results buffer without retriggering `rg` unlike picker:refresh()
+  -- when `rg` is finished
+  table.insert(picker._completion_callbacks, function()
+    picker:set_selection(picker:get_selection_row())
+  end)
   -- caching opts to be able to remove `title` from opts for entry maker for fuzzy refine
   picker._opts = opts
   picker.use_prefixes = vim.F.if_nil(opts.use_prefixes, egrep_conf.use_prefixes)
