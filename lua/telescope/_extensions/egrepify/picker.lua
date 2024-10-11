@@ -261,15 +261,8 @@ function Picker.picker(opts)
     end
 
     if entry.text then
-      local first_pos = string.find(line, ":", 1, true)
-      if first_pos == nil then
-        return
-      end
-      local second_pos = string.find(line, " ", first_pos + 1, true)
-      if second_pos == nil then
-        return
-      end
-      table.insert(regions[ft], { { index - 1, second_pos, index - 1, line:len() } })
+      local first_pos = string.find(line, " ", 1, true)
+      table.insert(regions[ft], { { index - 1, first_pos, index - 1, line:len() } })
       TSInjector.attach(picker_.results_bufnr, regions)
     end
   end
