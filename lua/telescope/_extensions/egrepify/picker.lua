@@ -261,8 +261,11 @@ function Picker.picker(opts)
     end
 
     if entry.text then
-      local first_pos = string.find(line, entry.text, 1, true)
-      table.insert(regions[ft], { { index - 1, first_pos - 1, index - 1, line:len() } })
+      local first_pos = string.find(line, vim.trim(entry.text), nil, true)
+      if first_pos == nil then
+        return
+      end
+      table.insert(regions[ft], { { index - 1, first_pos - 2, index - 1, line:len() } })
       TSInjector.attach(picker_.results_bufnr, regions)
     end
   end

@@ -231,11 +231,6 @@ vim.api.nvim_create_autocmd({ "User" }, {
     end)
     for i = first_line, bottom_line do
       local line = lines[i]
-      -- Find the first occurrence of ':'
-      local first_pos = string.find(line, ":", 1, true)
-      if first_pos == nil then
-        goto continue
-      end
       local entry = picker.manager:get_entry(i)
       if entry == nil then
         goto continue
@@ -248,8 +243,12 @@ vim.api.nvim_create_autocmd({ "User" }, {
         regions[ft] = {}
       end
       -- Find the second occurrence of ':' starting after the first occurrence
-      local second_pos = string.find(line, " ", first_pos + 1, true)
-      table.insert(regions[ft], { { i - 1, second_pos, i - 1, line:len() } })
+      local second_pos = string.find(line, vim.trim(entry.text), nil, true)
+      local s = line:sub(second_pos, line:len())
+      if second_pos == nil then
+        goto continue
+      end
+      table.insert(regions[ft], { { i - 1, second_pos - 2, i - 1, line:len() } })
       ::continue::
     end
     require("telescope._extensions.egrepify.treesitter").attach(bufnr, regions)
