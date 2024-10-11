@@ -245,13 +245,11 @@ function Picker.picker(opts)
     if row > line_count then
       return
     end
-    if line_count > 20 then
-      if index > 10 and index < line_count - 10 then
-        return
-      end
+    if index > 10 then
+      return
     end
     local line = vim.api.nvim_buf_get_lines(picker_.results_bufnr, row, row + 1, false)[1]
-    local ft = vim.filetype.match { filename = entry.filename }
+    local ft = require("plenary.filetype").detect(entry.filename)
     if ft == nil then
       return
     end
@@ -302,7 +300,6 @@ function Picker.picker(opts)
   if picker.permutations then
     picker.AND = true
   end
-
   picker:find()
 end
 

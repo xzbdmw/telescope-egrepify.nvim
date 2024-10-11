@@ -235,7 +235,7 @@ vim.api.nvim_create_autocmd({ "User" }, {
       if entry == nil then
         goto continue
       end
-      local ft = vim.filetype.match { filename = entry.filename }
+      local ft = require("plenary.filetype").detect(entry.filename)
       if ft == nil then
         goto continue
       end
