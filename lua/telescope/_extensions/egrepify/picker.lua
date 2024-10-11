@@ -88,7 +88,7 @@ local cached_opts = {}
 local deprecate = function(msg)
   vim.notify_once(msg, vim.log.levels.WARN, { title = "telescope-egrepify" })
 end
-
+_G.egrepfy_regions = {}
 ---telescope-egrepify picker
 ---@param opts PickerConfig see |telescope-egrepify.picker.PickerConfig|
 ---@usage `require("telescope").extensions.egrepify.picker()`
@@ -225,7 +225,6 @@ function Picker.picker(opts)
   local preview_fn = picker.previewer.preview
 
   local entry_adder = picker.entry_adder
-  local regions = {}
   local valid_lines = {}
   picker.entry_adder = function(picker_, index, entry, _, insert)
     entry_adder(picker_, index, entry, _, insert)
@@ -256,8 +255,8 @@ function Picker.picker(opts)
     if ft == nil then
       return
     end
-    if regions[ft] == nil then
-      regions[ft] = {}
+    if _G.egrepfy_regions[ft] == nil then
+      _G.egrepfy_regions[ft] = {}
     end
 
     if entry.text then
@@ -265,15 +264,15 @@ function Picker.picker(opts)
       if first_pos == nil then
         return
       end
-      table.insert(regions[ft], { { index - 1, first_pos - 2, index - 1, line:len() } })
-      TSInjector.attach(picker_.results_bufnr, regions)
+      table.insert(_G.egrepfy_regions[ft], { { index - 1, first_pos - 2, index - 1, line:len() - 1 } })
+      TSInjector.attach(picker_.results_bufnr, vim.deepcopy(_G.egrepfy_regions, true))
     end
   end
 
   -- invalidate regions after every keystroke
   local on_input_filter_cb = picker._on_input_filter_cb
   picker._on_input_filter_cb = function(prompt)
-    regions = {}
+    _G.egrepfy_regions = {}
     return on_input_filter_cb(prompt)
   end
 

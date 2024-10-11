@@ -222,14 +222,14 @@ vim.api.nvim_create_autocmd({ "User" }, {
     local bufnr = results.bufnr
     local winid = results.winid
     local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-    local regions = {}
+    _G.egrepfy_regions = {}
     local bottom_line = vim.api.nvim_win_call(winid, function()
       return vim.fn.line "w$"
     end)
     local first_line = vim.api.nvim_win_call(winid, function()
       return vim.fn.winsaveview().topline
     end)
-    for i = first_line, bottom_line do
+    for i = first_line, bottom_line + 1 do
       local line = lines[i]
       local entry = picker.manager:get_entry(i)
       if entry == nil then
@@ -239,19 +239,18 @@ vim.api.nvim_create_autocmd({ "User" }, {
       if ft == nil then
         goto continue
       end
-      if regions[ft] == nil then
-        regions[ft] = {}
+      if _G.egrepfy_regions[ft] == nil then
+        _G.egrepfy_regions[ft] = {}
       end
       -- Find the second occurrence of ':' starting after the first occurrence
       local second_pos = string.find(line, vim.trim(entry.text), nil, true)
-      local s = line:sub(second_pos, line:len())
       if second_pos == nil then
         goto continue
       end
-      table.insert(regions[ft], { { i - 1, second_pos - 2, i - 1, line:len() } })
+      table.insert(_G.egrepfy_regions[ft], { { i - 1, second_pos - 2, i - 1, line:len() } })
       ::continue::
     end
-    require("telescope._extensions.egrepify.treesitter").attach(bufnr, regions)
+    require("telescope._extensions.egrepify.treesitter").attach(bufnr, vim.deepcopy(_G.egrepfy_regions, true))
   end,
 })
 
