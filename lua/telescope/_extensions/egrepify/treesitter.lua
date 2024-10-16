@@ -70,7 +70,7 @@ function M._attach_lang(buf, lang, regions)
     if not ok then
       return
     end
-    parser:set_included_regions(regions)
+    parser:set_included_regions(vim.deepcopy(regions))
     M.cache[buf][lang] = {
       parser = parser,
       highlighter = TSHighlighter.new(parser),
@@ -79,7 +79,7 @@ function M._attach_lang(buf, lang, regions)
   M.cache[buf][lang].enabled = true
   local parser = M.cache[buf][lang].parser
 
-  parser:set_included_regions(regions)
+  parser:set_included_regions(vim.deepcopy(regions))
 end
 
 return M

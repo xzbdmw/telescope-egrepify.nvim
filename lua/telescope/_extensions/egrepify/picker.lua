@@ -263,7 +263,7 @@ function Picker.picker(opts)
         return
       end
       table.insert(_G.egrepfy_regions[ft], { { index - 1, first_pos - 2, index - 1, line:len() - 1 } })
-      TSInjector.attach(picker_.results_bufnr, vim.deepcopy(_G.egrepfy_regions, true))
+      TSInjector.attach(picker_.results_bufnr, _G.egrepfy_regions)
     end
   end
 

@@ -231,6 +231,9 @@ vim.api.nvim_create_autocmd({ "User" }, {
     end)
     for i = first_line, bottom_line + 1 do
       local line = lines[i]
+      if line == nil then
+        goto continue
+      end
       local entry = picker.manager:get_entry(i)
       if entry == nil then
         goto continue
@@ -250,7 +253,7 @@ vim.api.nvim_create_autocmd({ "User" }, {
       table.insert(_G.egrepfy_regions[ft], { { i - 1, second_pos - 2, i - 1, line:len() } })
       ::continue::
     end
-    require("telescope._extensions.egrepify.treesitter").attach(bufnr, vim.deepcopy(_G.egrepfy_regions, true))
+    require("telescope._extensions.egrepify.treesitter").attach(bufnr, _G.egrepfy_regions)
   end,
 })
 
