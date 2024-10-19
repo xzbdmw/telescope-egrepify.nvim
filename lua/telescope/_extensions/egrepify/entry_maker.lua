@@ -238,6 +238,9 @@ vim.api.nvim_create_autocmd({ "User" }, {
       if entry == nil then
         goto continue
       end
+      if entry.text ~= nil and string.len(entry.text) > 1000 then
+        goto continue
+      end
       local ft = require("plenary.filetype").detect(entry.filename)
       if ft == nil then
         goto continue

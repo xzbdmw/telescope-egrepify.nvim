@@ -227,11 +227,13 @@ function Picker.picker(opts)
   local entry_adder = picker.entry_adder
   local valid_lines = {}
   picker.entry_adder = function(picker_, index, entry, _, insert)
+    if entry.text ~= nil and string.len(entry.text) > 1000 then
+      entry.text = entry.text:sub(1, 1000)
+    end
     entry_adder(picker_, index, entry, _, insert)
     if not entry.kind == "match" then
       return
     end
-
     local row = picker_:get_row(index)
     local line_count = vim.api.nvim_buf_line_count(picker_.results_bufnr)
     local lines = vim.api.nvim_buf_get_lines(picker_.results_bufnr, 0, -1, false)
