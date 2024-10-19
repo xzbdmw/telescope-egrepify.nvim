@@ -214,6 +214,9 @@ vim.api.nvim_create_autocmd({ "User" }, {
     local prompt_bufnr = require("telescope.state").get_existing_prompt_bufnrs()[1]
 
     local picker = action_state.get_current_picker(prompt_bufnr)
+    if picker == nil then
+      return
+    end
     local title = picker.layout.picker.prompt_title
     if title ~= "Live Grep" then
       return
@@ -236,6 +239,9 @@ vim.api.nvim_create_autocmd({ "User" }, {
       end
       local entry = picker.manager:get_entry(i)
       if entry == nil then
+        goto continue
+      end
+      if entry.text ~= nil and string.len(entry.text) > 1000 then
         goto continue
       end
       local ft = require("plenary.filetype").detect(entry.filename)
