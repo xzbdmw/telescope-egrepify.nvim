@@ -218,7 +218,7 @@ vim.api.nvim_create_autocmd({ "User" }, {
       return
     end
     local title = picker.layout.picker.prompt_title
-    if title ~= "Live Grep" then
+    if title ~= "Live Grep" and title ~= "Git Diff" then
       return
     end
     local results = picker.layout.results
