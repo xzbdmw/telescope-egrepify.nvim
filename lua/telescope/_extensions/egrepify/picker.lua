@@ -150,7 +150,7 @@ function Picker.picker(opts)
   opts.searches_dirs = searches_dirs -- passthrough to entry maker
   local args = flatten { vimgrep_arguments, { "--json" } }
 
-  local live_grepper = finders.new_job(function(prompt)
+  local live_grepper = finders.new_bulk_job(function(prompt)
     if not prompt or prompt == "" then
       return nil
     end
@@ -247,7 +247,7 @@ function Picker.picker(opts)
     if row > line_count then
       return
     end
-    if index > 10 then
+    if index > 11 then
       return
     end
     local line = vim.api.nvim_buf_get_lines(picker_.results_bufnr, row, row + 1, false)[1]
