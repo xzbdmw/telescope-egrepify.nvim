@@ -247,7 +247,8 @@ function Picker.picker(opts)
     if row > line_count then
       return
     end
-    if index > 11 then
+    if index == 12 then
+      TSInjector.attach(picker_.results_bufnr, _G.egrepfy_regions)
       return
     end
     local line = vim.api.nvim_buf_get_lines(picker_.results_bufnr, row, row + 1, false)[1]
@@ -265,7 +266,6 @@ function Picker.picker(opts)
         return
       end
       table.insert(_G.egrepfy_regions[ft], { { index - 1, first_pos - 2, index - 1, line:len() - 1 } })
-      TSInjector.attach(picker_.results_bufnr, _G.egrepfy_regions)
     end
   end
 

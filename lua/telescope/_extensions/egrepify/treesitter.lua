@@ -3,7 +3,7 @@
 local M = {}
 
 M.cache = {} ---@type table<number, table<string,{parser: vim.treesitter.LanguageTree, highlighter:vim.treesitter.highlighter, enabled:boolean}>>
-local ns = vim.api.nvim_create_namespace "trouble.treesitter"
+local ns = vim.api.nvim_create_namespace "egrepify.treesitter"
 
 local TSHighlighter = vim.treesitter.highlighter
 
@@ -35,7 +35,7 @@ function M.setup()
   })
 
   vim.api.nvim_create_autocmd("BufWipeout", {
-    group = vim.api.nvim_create_augroup("trouble.treesitter.hl", { clear = true }),
+    group = vim.api.nvim_create_augroup("egrepify.treesitter.hl", { clear = true }),
     callback = function(ev)
       M.cache[ev.buf] = nil
     end,
