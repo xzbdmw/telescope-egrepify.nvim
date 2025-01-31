@@ -131,8 +131,7 @@ local cache = {}
 local function line_display(entry, data, opts, ts_highlights)
   entry = entry or {}
   if not cache[entry.filename] then
-    local tail = vim.fs.basename(entry.filename)
-    local file_devicon, devicon_hl = ts_utils.transform_devicons(tail, tail, false)
+    local file_devicon, devicon_hl = ts_utils.transform_devicons(entry.filename, entry.filename, false)
     cache[entry.filename] = { file_devicon, devicon_hl }
   end
   local file_devicon, devicon_hl = cache[entry.filename][1], cache[entry.filename][2]
@@ -171,7 +170,7 @@ local function line_display(entry, data, opts, ts_highlights)
   if opts.title == false then
     begin = find_whitespace(file_devicon)
     highlights[#highlights + 1] = { { 0, begin }, devicon_hl }
-    end_ = #vim.fs.basename(entry.filename) + begin
+    end_ = #entry.filename + begin
     highlights[#highlights + 1] = { { begin, end_ }, opts.filename_hl }
     begin = end_ + 1
   end
@@ -198,7 +197,7 @@ local function line_display(entry, data, opts, ts_highlights)
       local submatch = matches[i]
       local s, f = submatch["start"], submatch["end"]
       end_ = begin + f
-      highlights[#highlights + 1] = { { begin + s, end_ }, "TelescopeMatching" }
+      highlights[#highlights + 1] = { { begin + s, end_ }, "TelescopeGrepMatching" }
       for j = s, f - 1 do
         covered_ids[j] = true
       end
