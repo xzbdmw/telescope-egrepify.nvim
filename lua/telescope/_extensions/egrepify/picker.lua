@@ -247,8 +247,10 @@ function Picker.picker(opts)
     if row > line_count then
       return
     end
-    if index == 12 then
-      TSInjector.attach(picker_.results_bufnr, _G.egrepfy_regions)
+    if index >= 12 then
+      if index == 12 then
+        TSInjector.attach(picker_.results_bufnr, _G.egrepfy_regions)
+      end
       return
     end
     local line = vim.api.nvim_buf_get_lines(picker_.results_bufnr, row, row + 1, false)[1]
